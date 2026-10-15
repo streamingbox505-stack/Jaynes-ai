@@ -1,0 +1,27 @@
+name: Train translated model
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"     # kila saa 6
+  workflow_dispatch:           # pia: Actions -> Run workflow
+
+concurrency:
+  group: train-model
+  cancel-in-progress: false
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q numpy huggingface_hub
+      - run: python train.py
+        env:
+          TR_KEY: ${{ secrets.TR_KEY }}              # sawa na MOVIE_ADMIN_KEY ya Supabase
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}          # token ya HF yenye Write
+          TR_URL: ${{ vars.TR_URL || 'https://ooqvsqmsnwjqvuzbhczx.supabase.co/functions/v1/movie-zilizotafsriwa2' }}
+          MODEL_REPO: ${{ vars.MODEL_REPO || 'jaynesmaxtv/translated-recommender' }}
